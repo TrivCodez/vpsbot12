@@ -690,38 +690,6 @@ async def create_vps(
         )
         return
 
-    # Host resource validation (requires docker SDK)
-    if _docker_client:
-        try:
-            info      = _docker_client.info()
-            host_cpus = info["NCPU"]
-            host_mem  = info["MemTotal"] / (1024 ** 3)
-            req_cpu   = float(cpu)
-            req_ram   = parse_gb(ram)
-            if req_cpu > host_cpus:
-                await interaction.response.send_message(
-                    embed=embed_err(
-                        f"Requested CPU ({req_cpu}) exceeds host limit ({host_cpus})."
-                    ),
-                    ephemeral=True,
-                )
-                return
-            if req_ram > host_mem:
-                await interaction.response.send_message(
-                    embed=embed_err(
-                        f"Requested RAM ({req_ram:.1f}GB) exceeds host limit ({host_mem:.1f}GB)."
-                    ),
-                    ephemeral=True,
-                )
-                return
-        except Exception as exc:
-            logger.error("Resource validation failed: %s", exc)
-            await interaction.response.send_message(
-                embed=embed_err("Resource validation failed. Contact an admin."),
-                ephemeral=True,
-            )
-            return
-
     await interaction.response.defer(ephemeral=True)
     await interaction.followup.send("⏳ Creating your VPS instance…", ephemeral=True)
 
